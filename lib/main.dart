@@ -1,10 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:provider/provider.dart';
+
+import 'config/environment.dart';
 import 'l10n/app_localizations.dart';
+import 'screens/home/home_screen.dart';
+import 'services/auth_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Configuração e validação do ambiente
+  if (Environment.isDebug) {
+    print(EnvironmentUtils.formatEnvironmentInfo());
+  }
+
+  try {
+    // Validar configurações essenciais (não quebra o app se falhar)
+    EnvironmentValidator.validateGeminiConfig();
+  } catch (e) {
+    print('⚠️ Aviso de configuração: $e');
+    print('📝 O app continuará com mensagens locais');
+  }
+
+  // Inicializar Firebase
   await Firebase.initializeApp();
+
   runApp(const MyApp());
 }
 
@@ -13,63 +34,38 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Gotas da Felicidade',
-      localizationsDelegates: const [
-        AppLocalizations.delegate,
-        DefaultMaterialLocalizations.delegate,
-        DefaultWidgetsLocalizations.delegate,
+    return MultiProvider(
+      providers: [
+        Provider<AuthService>(create: (_) => AuthService()),
+        // Outros providers podem ser adicionados aqui
       ],
-      supportedLocales: const [
-        Locale('en'), // English
-        Locale('pt'), // Portuguese
-        Locale('es'), // Spanish
-        Locale('fr'), // French
-        Locale('zh'), // Chinese
-        Locale('ja'), // Japanese
-        Locale('ar'), // Arabic
-      ],
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        visualDensity: VisualDensity.adaptivePlatformDensity,
-      ),
-      home: const TestScreen(),
-      debugShowCheckedModeBanner: false,
-    );
-  }
-}
-
-class TestScreen extends StatelessWidget {
-  const TestScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(AppLocalizations.of(context).appTitle),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              AppLocalizations.of(context).welcome,
-              style: const TextStyle(fontSize: 20),
-            ),
-            const SizedBox(height: 20),
-            Text(AppLocalizations.of(context).dailyMotivation),
-            const SizedBox(height: 20),
-            Text(
-              AppLocalizations.of(context).happinessQuote,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {},
-              child: Text(AppLocalizations.of(context).getMotivation),
-            ),
-          ],
+      child: MaterialApp(
+        title: Environment.appName,
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          DefaultMaterialLocalizations.delegate,
+          DefaultWidgetsLocalizations.delegate,
+        ],
+        supportedLocales: const [
+          Locale('en'), // English
+          Locale('pt'), // Portuguese
+          Locale('es'), // Spanish
+          Locale('fr'), // French
+          Locale('zh'), // Chinese
+          Locale('ja'), // Japanese
+          Locale('ar'), // Arabic
+        ],
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+          visualDensity: VisualDensity.adaptivePlatformDensity,
+          fontFamily: 'NotoSans',
+          useMaterial3: true,
         ),
+        darkTheme: ThemeData.dark().copyWith(
+          visualDensity: VisualDensity.adaptivePlatformDensity,
+        ),
+        home: const HomeScreen(), // Temporariamente direto para Home
+        debugShowCheckedModeBanner: Environment.isDebug,
       ),
     );
   }

@@ -175,12 +175,12 @@ class ApiException implements Exception {
 class EnvironmentValidator {
   /// Valida todas as configurações necessárias
   static void validateAll() {
-    _validateGeminiConfig();
-    _validateFirebaseConfig();
+    validateGeminiConfig();
+    validateFirebaseConfig();
   }
 
-  /// Valida configurações da Gemini AI
-  static void _validateGeminiConfig() {
+  /// Valida configurações da Gemini AI (AGORA PÚBLICO)
+  static void validateGeminiConfig() {
     if (Environment.geminiApiKey.isEmpty) {
       throw EnvironmentException(
         'Chave da API Gemini não configurada. '
@@ -198,8 +198,8 @@ class EnvironmentValidator {
     }
   }
 
-  /// Valida configurações do Firebase
-  static void _validateFirebaseConfig() {
+  /// Valida configurações do Firebase (AGORA PÚBLICO)
+  static void validateFirebaseConfig() {
     // Verificações básicas do Firebase
     if (Environment.firebaseProjectId.isEmpty) {
       throw EnvironmentException(
@@ -229,7 +229,7 @@ class EnvironmentValidator {
   /// Verifica se o ambiente está configurado para desenvolvimento
   static bool isDevelopmentConfigured() {
     try {
-      _validateGeminiConfig();
+      validateGeminiConfig();
       return true;
     } catch (e) {
       return false;
@@ -277,7 +277,7 @@ class EnvironmentUtils {
 
   /// Valida e retorna a chave da API Gemini
   static String getValidatedGeminiApiKey() {
-    EnvironmentValidator._validateGeminiConfig();
+    EnvironmentValidator.validateGeminiConfig();
     return Environment.geminiApiKey;
   }
 }

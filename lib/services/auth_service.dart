@@ -7,6 +7,8 @@ class AuthService {
 
   Stream<User?> get user => _auth.authStateChanges();
 
+  User? get currentUser => _auth.currentUser;
+
   Future<User?> signUp(String email, String password, String name) async {
     try {
       UserCredential result = await _auth.createUserWithEmailAndPassword(
@@ -20,6 +22,7 @@ class AuthService {
         'createdAt': FieldValue.serverTimestamp(),
         'preferredLanguage': 'pt',
         'dailyMotivationEnabled': true,
+        'lastLogin': FieldValue.serverTimestamp(),
       });
 
       return result.user;
@@ -34,6 +37,12 @@ class AuthService {
           email: email,
           password: password
       );
+
+      // Atualizar último login
+      await _firestore.collection('users').doc(result.user!.uid).update({
+        'lastLogin': FieldValue.serverTimestamp(),
+      });
+
       return result.user;
     } catch (e) {
       rethrow;
@@ -42,5 +51,29 @@ class AuthService {
 
   Future<void> signOut() async {
     await _auth.signOut();
+  }
+
+  Future<void> resetPassword(String email) async {
+    await _auth.sendPasswordResetEmail(email: email);
+  }
+
+  Future<void> updateUserProfile(String name, String? preferredLanguage) async {
+    final user = _auth.currentUser;
+    if (user != null) {
+      await _firestore.collection('users').doc(user.uid).update({
+        'name': name,
+        if (preferredLanguage != null) 'preferredLanguage': preferredLanguage,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+    }
+  }
+
+  Future<Map<String, dynamic>?> getUserData() async {
+    final user = _auth.currentUser;
+    if (user != null) {
+      final doc = await _firestore.collection('users').doc(user.uid).get();
+      return doc.data();
+    }
+    return null;
   }
 }

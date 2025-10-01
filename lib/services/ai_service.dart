@@ -32,7 +32,7 @@ class AIService {
       }
 
       // Validar configuração do ambiente
-      EnvironmentValidator._validateGeminiConfig();
+      EnvironmentValidator.validateGeminiConfig();
 
       final prompt = _buildPrompt(userMood);
       final response = await _makeApiRequest(prompt);
@@ -325,7 +325,7 @@ class AIService {
   /// Verifica se o serviço está configurado e funcionando
   static Future<bool> checkServiceHealth() async {
     try {
-      EnvironmentValidator._validateGeminiConfig();
+      EnvironmentValidator.validateGeminiConfig();
 
       // Fazer uma requisição de teste simples
       final testPrompt = 'Responda apenas com "OK" se estiver funcionando.';
