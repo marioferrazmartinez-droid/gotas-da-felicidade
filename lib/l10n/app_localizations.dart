@@ -1,3 +1,5 @@
+// lib/l10n/app_localizations.dart
+
 import 'package:flutter/material.dart';
 
 class AppLocalizations {
@@ -11,35 +13,61 @@ class AppLocalizations {
 
   static const LocalizationsDelegate<AppLocalizations> delegate = _AppLocalizationsDelegate();
 
-  // Métodos para cada texto
-  String get appTitle => _localizedValues[locale.languageCode]!['appTitle']!;
-  String get welcome => _localizedValues[locale.languageCode]!['welcome']!;
-  String get dailyMotivation => _localizedValues[locale.languageCode]!['dailyMotivation']!;
-  String get getMotivation => _localizedValues[locale.languageCode]!['getMotivation']!;
-  String get newMotivation => _localizedValues[locale.languageCode]!['newMotivation']!;
-  String get settings => _localizedValues[locale.languageCode]!['settings']!;
-  String get language => _localizedValues[locale.languageCode]!['language']!;
-  String get login => _localizedValues[locale.languageCode]!['login']!;
-  String get signup => _localizedValues[locale.languageCode]!['signup']!;
-  String get logout => _localizedValues[locale.languageCode]!['logout']!;
-  String get email => _localizedValues[locale.languageCode]!['email']!;
-  String get password => _localizedValues[locale.languageCode]!['password']!;
-  String get name => _localizedValues[locale.languageCode]!['name']!;
-  String get confirmPassword => _localizedValues[locale.languageCode]!['confirmPassword']!;
-  String get alreadyHaveAccount => _localizedValues[locale.languageCode]!['alreadyHaveAccount']!;
-  String get dontHaveAccount => _localizedValues[locale.languageCode]!['dontHaveAccount']!;
-  String get or => _localizedValues[locale.languageCode]!['or']!;
-  String get loading => _localizedValues[locale.languageCode]!['loading']!;
-  String get error => _localizedValues[locale.languageCode]!['error']!;
-  String get success => _localizedValues[locale.languageCode]!['success']!;
-  String get motivationLoading => _localizedValues[locale.languageCode]!['motivationLoading']!;
-  String get todayMessage => _localizedValues[locale.languageCode]!['todayMessage']!;
-  String get notificationTitle => _localizedValues[locale.languageCode]!['notificationTitle']!;
-  String get notificationBody => _localizedValues[locale.languageCode]!['notificationBody']!;
-  String get goodMorning => _localizedValues[locale.languageCode]!['goodMorning']!;
-  String get goodAfternoon => _localizedValues[locale.languageCode]!['goodAfternoon']!;
-  String get goodEvening => _localizedValues[locale.languageCode]!['goodEvening']!;
-  String get happinessQuote => _localizedValues[locale.languageCode]!['happinessQuote']!;
+  // Métodos com fallback para inglês
+  String get appTitle => _getLocalizedValue('appTitle');
+  String get welcome => _getLocalizedValue('welcome');
+  String get dailyMotivation => _getLocalizedValue('dailyMotivation');
+  String get getMotivation => _getLocalizedValue('getMotivation');
+  String get newMotivation => _getLocalizedValue('newMotivation');
+  String get settings => _getLocalizedValue('settings');
+  String get language => _getLocalizedValue('language');
+  String get login => _getLocalizedValue('login');
+  String get signup => _getLocalizedValue('signup');
+  String get logout => _getLocalizedValue('logout');
+  String get email => _getLocalizedValue('email');
+  String get password => _getLocalizedValue('password');
+  String get name => _getLocalizedValue('name');
+  String get confirmPassword => _getLocalizedValue('confirmPassword');
+  String get alreadyHaveAccount => _getLocalizedValue('alreadyHaveAccount');
+  String get dontHaveAccount => _getLocalizedValue('dontHaveAccount');
+  String get or => _getLocalizedValue('or');
+  String get loading => _getLocalizedValue('loading');
+  String get error => _getLocalizedValue('error');
+  String get success => _getLocalizedValue('success');
+  String get motivationLoading => _getLocalizedValue('motivationLoading');
+  String get todayMessage => _getLocalizedValue('todayMessage');
+  String get notificationTitle => _getLocalizedValue('notificationTitle');
+  String get notificationBody => _getLocalizedValue('notificationBody');
+  String get goodMorning => _getLocalizedValue('goodMorning');
+  String get goodAfternoon => _getLocalizedValue('goodAfternoon');
+  String get goodEvening => _getLocalizedValue('goodEvening');
+  String get happinessQuote => _getLocalizedValue('happinessQuote');
+
+  /// Obtém valor localizado com fallback para inglês
+  String _getLocalizedValue(String key) {
+    final languageCode = locale.languageCode;
+
+    // Tenta obter do idioma atual
+    final value = _localizedValues[languageCode]?[key];
+    if (value != null) return value;
+
+    // Fallback para inglês
+    final englishValue = _localizedValues['en']?[key];
+    if (englishValue != null) return englishValue;
+
+    // Fallback final
+    return '[$key]';
+  }
+
+  /// Verifica se um idioma é suportado
+  static bool isLanguageSupported(String languageCode) {
+    return _localizedValues.containsKey(languageCode);
+  }
+
+  /// Lista de idiomas suportados
+  static List<String> get supportedLanguages {
+    return _localizedValues.keys.toList();
+  }
 
   static final Map<String, Map<String, String>> _localizedValues = {
     'en': {
@@ -102,6 +130,66 @@ class AppLocalizations {
       'goodEvening': 'Boa Noite',
       'happinessQuote': 'A felicidade não é algo pronto. Ela vem das suas próprias ações.',
     },
+    'es': {
+      'appTitle': 'Gotas de Felicidad',
+      'welcome': '¡Bienvenido a Gotas de Felicidad!',
+      'dailyMotivation': 'Tu motivación diaria',
+      'getMotivation': 'Obtener Motivación',
+      'newMotivation': 'Nueva Motivación',
+      'settings': 'Configuración',
+      'language': 'Idioma',
+      'login': 'Iniciar Sesión',
+      'signup': 'Registrarse',
+      'logout': 'Cerrar Sesión',
+      'email': 'Correo Electrónico',
+      'password': 'Contraseña',
+      'name': 'Nombre',
+      'confirmPassword': 'Confirmar Contraseña',
+      'alreadyHaveAccount': '¿Ya tienes una cuenta?',
+      'dontHaveAccount': '¿No tienes una conta?',
+      'or': 'O',
+      'loading': 'Cargando...',
+      'error': 'Error',
+      'success': 'Éxito',
+      'motivationLoading': 'Generando tu motivación diaria...',
+      'todayMessage': 'Mensaje de hoy',
+      'notificationTitle': '¡Tu dosis diaria de felicidad!',
+      'notificationBody': 'Toca para recibir tu mensaje motivacional',
+      'goodMorning': 'Buenos Días',
+      'goodAfternoon': 'Buenas Tardes',
+      'goodEvening': 'Buenas Noches',
+      'happinessQuote': 'La felicidad no es algo hecho. Viene de tus propias acciones.',
+    },
+    'fr': {
+      'appTitle': 'Gouttes de Bonheur',
+      'welcome': 'Bienvenue à Gouttes de Bonheur!',
+      'dailyMotivation': 'Votre motivation quotidienne',
+      'getMotivation': 'Obtenir une Motivation',
+      'newMotivation': 'Nouvelle Motivation',
+      'settings': 'Paramètres',
+      'language': 'Langue',
+      'login': 'Connexion',
+      'signup': 'S\'inscrire',
+      'logout': 'Déconnexion',
+      'email': 'E-mail',
+      'password': 'Mot de passe',
+      'name': 'Nom',
+      'confirmPassword': 'Confirmer le mot de passe',
+      'alreadyHaveAccount': 'Vous avez déjà un compte?',
+      'dontHaveAccount': 'Vous n\'avez pas de compte?',
+      'or': 'OU',
+      'loading': 'Chargement...',
+      'error': 'Erreur',
+      'success': 'Succès',
+      'motivationLoading': 'Génération de votre motivation quotidienne...',
+      'todayMessage': 'Message du jour',
+      'notificationTitle': 'Votre dose quotidienne de bonheur!',
+      'notificationBody': 'Tapez pour recevoir votre message de motivation',
+      'goodMorning': 'Bonjour',
+      'goodAfternoon': 'Bon Après-midi',
+      'goodEvening': 'Bonsoir',
+      'happinessQuote': 'Le bonheur n\'est pas quelque chose de tout fait. Il vient de vos propres actions.',
+    },
   };
 }
 
@@ -110,7 +198,7 @@ class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> 
 
   @override
   bool isSupported(Locale locale) {
-    return ['en', 'pt', 'es', 'fr', 'zh', 'ja', 'ar'].contains(locale.languageCode);
+    return AppLocalizations.isLanguageSupported(locale.languageCode);
   }
 
   @override
