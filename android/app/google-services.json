@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "604279967203",
+    "project_id": "gotasdafelicidade-760fa",
+    "storage_bucket": "gotasdafelicidade-760fa.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:604279967203:android:fce03ed44a41c5026164d6",
+        "android_client_info": {
+          "package_name": "com.example.gotas_da_felicidade"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCMR8UtO6oH4wdXxPAltV_o8gs2jb1rwqQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
