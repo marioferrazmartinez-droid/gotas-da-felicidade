@@ -1,101 +1,104 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:timezone/timezone.dart' as tz;
+import 'package:timezone/data/latest.dart' as tz;
 
 class NotificationService {
-  static final FlutterLocalNotificationsPlugin _notifications =
+  static final NotificationService _instance = NotificationService._internal();
+  factory NotificationService() => _instance;
+  NotificationService._internal();
+
+  static final FlutterLocalNotificationsPlugin _notificationsPlugin =
   FlutterLocalNotificationsPlugin();
 
-  static Future<void> initialize() async {
-    const AndroidInitializationSettings initializationSettingsAndroid =
+  Future<void> init() async {
+    tz.initializeTimeZones();
+
+    const AndroidInitializationSettings androidSettings =
     AndroidInitializationSettings('@mipmap/ic_launcher');
 
-    const DarwinInitializationSettings initializationSettingsDarwin =
-    DarwinInitializationSettings(
-      requestAlertPermission: false,
-      requestBadgePermission: false,
-      requestSoundPermission: false,
+    const DarwinInitializationSettings iosSettings =
+    DarwinInitializationSettings();
+
+    const InitializationSettings settings = InitializationSettings(
+      android: androidSettings,
+      iOS: iosSettings,
     );
 
-    const InitializationSettings initializationSettings =
-    InitializationSettings(
-      android: initializationSettingsAndroid,
-      iOS: initializationSettingsDarwin,
-    );
-
-    await _notifications.initialize(initializationSettings);
+    await _notificationsPlugin.initialize(settings);
   }
 
-  static Future<void> showDailyNotification(String message) async {
-    const AndroidNotificationDetails androidPlatformChannelSpecifics =
-    AndroidNotificationDetails(
-      'happiness_channel',
-      'Gotas da Felicidade',
-      channelDescription: 'Notificações diárias motivacionais',
-      importance: Importance.defaultImportance,
-      priority: Priority.defaultPriority,
-      showWhen: true,
-    );
-
-    const DarwinNotificationDetails darwinPlatformChannelSpecifics =
-    DarwinNotificationDetails();
-
-    const NotificationDetails platformChannelSpecifics = NotificationDetails(
-      android: androidPlatformChannelSpecifics,
-      iOS: darwinPlatformChannelSpecifics,
-    );
-
-    await _notifications.show(
+  Future<void> scheduleDailyNotification({
+    required int hour,
+    required int minute,
+    required String title,
+    required String body,
+  }) async {
+    await _notificationsPlugin.zonedSchedule(
       0,
-      'Sua Gotinha de Felicidade 💫',
-      message,
-      platformChannelSpecifics,
-    );
-  }
-
-  static Future<void> scheduleDailyNotification(String message) async {
-    final now = DateTime.now();
-    final scheduledTime = DateTime(now.year, now.month, now.day, 8, 0, 0);
-    if (scheduledTime.isBefore(now)) {
-      scheduledTime.add(const Duration(days: 1));
-    }
-
-    const AndroidNotificationDetails androidPlatformChannelSpecifics =
-    AndroidNotificationDetails(
-      'happiness_channel',
-      'Gotas da Felicidade',
-      channelDescription: 'Notificações diárias motivacionais',
-      importance: Importance.defaultImportance,
-      priority: Priority.defaultPriority,
-    );
-
-    const DarwinNotificationDetails darwinPlatformChannelSpecifics =
-    DarwinNotificationDetails();
-
-    const NotificationDetails platformChannelSpecifics = NotificationDetails(
-      android: androidPlatformChannelSpecifics,
-      iOS: darwinPlatformChannelSpecifics,
-    );
-
-    await _notifications.zonedSchedule(
-      0,
-      'Sua Gotinha de Felicidade 💫',
-      message,
-      scheduledTime,
-      platformChannelSpecifics,
-      uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
+      title,
+      body,
+      _nextInstanceOfTime(hour, minute),
+      const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'daily_motivation',
+          'Motivação Diária',
+          channelDescription: 'Notificações com mensagens motivacionais diárias',
+          importance: Importance.high,
+          priority: Priority.high,
+        ),
+        iOS: DarwinNotificationDetails(
+          sound: 'default',
+          presentAlert: true,
+          presentBadge: true,
+          presentSound: true,
+        ),
+      ),
+      uiLocalNotificationDateInterpretation:
+      UILocalNotificationDateInterpretation.absoluteTime,
+      matchDateTimeComponents: DateTimeComponents.time,
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
     );
   }
 
-  static Future<void> cancelAllNotifications() async {
-    await _notifications.cancelAll();
+  tz.TZDateTime _nextInstanceOfTime(int hour, int minute) {
+    final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
+    tz.TZDateTime scheduledDate = tz.TZDateTime(
+      tz.local,
+      now.year,
+      now.month,
+      now.day,
+      hour,
+      minute,
+    );
+
+    if (scheduledDate.isBefore(now)) {
+      scheduledDate = scheduledDate.add(const Duration(days: 1));
+    }
+
+    return scheduledDate;
   }
 
-  static Future<void> cancelNotification(int id) async {
-    await _notifications.cancel(id);
+  Future<void> cancelAllNotifications() async {
+    await _notificationsPlugin.cancelAll();
   }
 
-  static Future<bool> isNotificationScheduled(int id) async {
-    final pendingNotifications = await _notifications.pendingNotificationRequests();
-    return pendingNotifications.any((notification) => notification.id == id);
+  Future<void> showInstantNotification({
+    required String title,
+    required String body,
+  }) async {
+    await _notificationsPlugin.show(
+      1,
+      title,
+      body,
+      const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'instant_motivation',
+          'Motivação Instantânea',
+          channelDescription: 'Notificações instantâneas motivacionais',
+          importance: Importance.high,
+          priority: Priority.high,
+        ),
+      ),
+    );
   }
 }

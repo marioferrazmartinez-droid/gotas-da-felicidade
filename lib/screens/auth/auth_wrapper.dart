@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import '../home/home_screen.dart';
-import 'login_screen.dart';
 
 class AuthWrapper extends StatelessWidget {
   const AuthWrapper({super.key});
@@ -11,23 +10,63 @@ class AuthWrapper extends StatelessWidget {
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
 
-    // Mostrar loading enquanto verifica o estado de autenticação
     if (authProvider.isLoading) {
       return const Scaffold(
         body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              CircularProgressIndicator(),
-              SizedBox(height: 20),
-              Text('Verificando autenticação...'),
-            ],
-          ),
+          child: CircularProgressIndicator(),
         ),
       );
     }
 
-    // Se estiver logado, vai para Home, senão para Login
-    return authProvider.isLoggedIn ? const HomeScreen() : const LoginScreen();
+    return authProvider.isLoggedIn
+        ? const HomeScreen()
+        : _buildLoginScreen(context);
+  }
+
+  Widget _buildLoginScreen(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(
+              Icons.psychology,
+              size: 80,
+              color: Colors.deepPurple,
+            ),
+            const SizedBox(height: 20),
+            const Text(
+              'Gotas da Felicidade',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.deepPurple,
+              ),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Sua dose diária de motivação',
+              style: TextStyle(fontSize: 16),
+            ),
+            const SizedBox(height: 40),
+            ElevatedButton(
+              onPressed: () {
+                // Login simples para demonstração
+                Provider.of<AuthProvider>(context, listen: false).login(
+                  'usuario@exemplo.com',
+                  'senha',
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.deepPurple,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+              ),
+              child: const Text('Entrar'),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

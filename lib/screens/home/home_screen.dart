@@ -1,195 +1,133 @@
 import 'package:flutter/material.dart';
-import 'package:gotas_da_felicidade/l10n/app_localizations.dart';
-import 'package:gotas_da_felicidade/widgets/message_card.dart';
-import 'package:gotas_da_felicidade/widgets/settings_dialog.dart';
-import 'package:gotas_da_felicidade/models/user_model.dart';
+import 'package:provider/provider.dart';
+import '../../providers/quote_provider.dart';
+import '../../widgets/message_card.dart';
+import '../../widgets/settings_dialog.dart';
 
 class HomeScreen extends StatefulWidget {
-  final Function(Locale) onLanguageChanged;
-  final UserModel user;
-  final VoidCallback onLogout;
-
-  const HomeScreen({
-    super.key,
-    required this.onLanguageChanged,
-    required this.user,
-    required this.onLogout,
-  });
+  const HomeScreen({super.key});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  String _currentMessage = '';
-  bool _isLoading = true;
-  String _currentLanguage = 'pt';
-  int _counter = 0;
+  int _currentQuoteIndex = 0;
 
   @override
   void initState() {
     super.initState();
-    _loadDailyMessage();
+    _initializeApp();
   }
 
-  Future<void> _loadDailyMessage() async {
-    setState(() => _isLoading = true);
+  Future<void> _initializeApp() async {
+    // Inicialização geral do app
+    // Notificações podem ser adicionadas posteriormente
+  }
 
-    // Simular carregamento de mensagem
-    await Future.delayed(const Duration(seconds: 2));
-
-    final messages = [
-      'Seja a mudança que você quer ver no mundo! 🌟',
-      'Cada dia é uma nova oportunidade! 💫',
-      'Seu sorriso pode iluminar o dia de alguém! 😊',
-      'Pequenos passos levam a grandes conquistas! 🚀',
-      'Você é capaz de coisas incríveis! 🌈'
-    ];
-
+  void _showNextQuote() {
     setState(() {
-      _currentMessage = messages[_counter % messages.length];
-      _isLoading = false;
-      _counter++;
+      final quoteProvider = Provider.of<QuoteProvider>(context, listen: false);
+      _currentQuoteIndex = (_currentQuoteIndex + 1) % quoteProvider.quotes.length;
     });
   }
 
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-      // Usando a variável currentCount
-      final currentCount = _counter;
-      print('Contador atualizado: $currentCount');
-      _loadDailyMessage(); // Recarregar mensagem quando o contador mudar
-    });
+  void _showSettings() {
+    showDialog(
+      context: context,
+      builder: (context) => const SettingsDialog(),
+    );
   }
 
-  void _changeLanguage(String languageCode) {
-    setState(() {
-      _currentLanguage = languageCode;
-    });
-    widget.onLanguageChanged(Locale(languageCode));
-    _loadDailyMessage();
+  void _shareQuote(Quote quote) {
+    final shareText = '"${quote.text}" - ${quote.author}';
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Compartilhando: $shareText')),
+    );
   }
 
-  void _shareMessage() {
-    // Implementar compartilhamento
-    print('Compartilhar mensagem: $_currentMessage');
-    // Aqui você pode integrar com share_plus
+  void _showFavorites() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Funcionalidade de favoritos em desenvolvimento')),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final localizations = AppLocalizations.of(context);
+    final quoteProvider = Provider.of<QuoteProvider>(context);
+    final quotes = quoteProvider.quotes;
+
+    if (quotes.isEmpty) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('Gotas da Felicidade'),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.settings),
+              onPressed: _showSettings,
+            ),
+          ],
+        ),
+        body: const Center(
+          child: Text('Nenhuma mensagem disponível'),
+        ),
+      );
+    }
+
+    final currentQuote = quotes[_currentQuoteIndex];
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(localizations?.appTitle ?? 'Gotas da Felicidade'),
-        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+        title: const Text('Gotas da Felicidade'),
+        backgroundColor: Colors.deepPurple,
+        foregroundColor: Colors.white,
         actions: [
           IconButton(
-            icon: const Icon(Icons.share),
-            onPressed: _currentMessage.isNotEmpty ? _shareMessage : null,
-            tooltip: 'Compartilhar mensagem',
+            icon: const Icon(Icons.favorite),
+            onPressed: _showFavorites,
           ),
           IconButton(
             icon: const Icon(Icons.settings),
-            onPressed: () => showDialog(
-              context: context,
-              builder: (context) => SettingsDialog(
-                currentLanguage: _currentLanguage,
-                onLanguageChanged: _changeLanguage,
-                user: widget.user,
-                onLogout: widget.onLogout,
-              ),
-            ),
-            tooltip: 'Configurações',
+            onPressed: _showSettings,
           ),
         ],
       ),
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Theme.of(context).colorScheme.primaryContainer,
-              Theme.of(context).colorScheme.background,
-            ],
+      body: Column(
+        children: [
+          Expanded(
+            child: MessageCard(
+              quote: currentQuote,
+              onFavorite: () {
+                quoteProvider.toggleFavorite(currentQuote);
+              },
+              onShare: () => _shareQuote(currentQuote),
+            ),
           ),
-        ),
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // Informações do usuário
-              if (widget.user.photoURL != null)
-                CircleAvatar(
-                  backgroundImage: NetworkImage(widget.user.photoURL!),
-                  radius: 30,
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              children: [
+                ElevatedButton(
+                  onPressed: _showNextQuote,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.deepPurple,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                  ),
+                  child: const Text('Próxima Mensagem'),
                 ),
-              const SizedBox(height: 16),
-              Text(
-                'Olá, ${widget.user.displayName}!',
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                widget.user.email,
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-              const SizedBox(height: 32),
-
-              // Mensagem do dia
-              Text(
-                localizations?.dailyMessage ?? 'Sua Motivação Diária',
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onBackground,
-                ),
-              ),
-              const SizedBox(height: 40),
-
-              // Card da mensagem
-              MessageCard(
-                message: _currentMessage,
-                isLoading: _isLoading,
-                onTap: _loadDailyMessage,
-              ),
-              const SizedBox(height: 20),
-
-              // Instrução
-              Text(
-                localizations?.tapForMore ?? 'Toque para outra mensagem',
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-
-              // Contador (para demonstração)
-              const SizedBox(height: 40),
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    children: [
-                      Text(
-                        'Estatística:',
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Mensagens visualizadas: $_counter',
-                        style: Theme.of(context).textTheme.bodyLarge,
-                      ),
-                      const SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: _incrementCounter,
-                        child: const Text('Incrementar Contador'),
-                      ),
-                    ],
+                const SizedBox(height: 8),
+                const Text(
+                  'Toque para mais inspiração',
+                  style: TextStyle(
+                    color: Colors.grey,
+                    fontSize: 14,
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }

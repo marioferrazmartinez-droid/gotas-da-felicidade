@@ -1,153 +1,116 @@
 import 'package:flutter/foundation.dart';
 import '../models/user_model.dart';
-import '../services/auth_service.dart';
 
 class AuthProvider with ChangeNotifier {
-  final AuthService authService;
-  UserModel? _user;
+  User? _user;
   bool _isLoading = false;
-  String? _error;
+  bool _rememberMe = false;
 
-  AuthProvider({required this.authService});
-
-  UserModel? get user => _user;
+  User? get user => _user;
   bool get isLoading => _isLoading;
-  String? get error => _error;
+  bool get rememberMe => _rememberMe;
+  bool get isLoggedIn => _user != null;
 
-  Future<void> initialize() async {
+  void setRememberMe(bool value) {
+    _rememberMe = value;
+    notifyListeners();
+  }
+
+  Future<void> login(String email, String password) async {
     _isLoading = true;
     notifyListeners();
 
     try {
-      _user = await authService.getCurrentUser();
-      _error = null;
-    } catch (e) {
-      _error = e.toString();
-      if (kDebugMode) {
-        print('Erro ao inicializar auth: $e');
-      }
-    } finally {
+      // Simular login
+      await Future.delayed(const Duration(seconds: 2));
+
+      _user = User(
+        id: '1',
+        email: email,
+        name: 'Usuário',
+        createdAt: DateTime.now(),
+        lastLogin: DateTime.now(),
+      );
+
       _isLoading = false;
       notifyListeners();
+    } catch (error) {
+      _isLoading = false;
+      notifyListeners();
+      rethrow;
     }
   }
 
-  Future<void> signInWithGoogle() async {
-    _isLoading = true;
-    _error = null;
-    notifyListeners();
-
-    try {
-      _user = await authService.signInWithGoogle();
-      _error = null;
-    } catch (e) {
-      _error = e.toString();
-      if (kDebugMode) {
-        print('Erro no login com Google: $e');
-      }
-    } finally {
-      _isLoading = false;
-      notifyListeners();
-    }
-  }
-
-  Future<void> signInWithFacebook() async {
-    _isLoading = true;
-    _error = null;
-    notifyListeners();
-
-    try {
-      _user = await authService.signInWithFacebook();
-      _error = null;
-    } catch (e) {
-      _error = e.toString();
-      if (kDebugMode) {
-        print('Erro no login com Facebook: $e');
-      }
-    } finally {
-      _isLoading = false;
-      notifyListeners();
-    }
-  }
-
-  Future<void> signInWithEmail(String email, String password) async {
-    _isLoading = true;
-    _error = null;
-    notifyListeners();
-
-    try {
-      _user = await authService.signInWithEmail(email, password);
-      _error = null;
-    } catch (e) {
-      _error = e.toString();
-      if (kDebugMode) {
-        print('Erro no login com email: $e');
-      }
-    } finally {
-      _isLoading = false;
-      notifyListeners();
-    }
-  }
-
-  Future<void> signUpWithEmail(String email, String password, String displayName) async {
-    _isLoading = true;
-    _error = null;
-    notifyListeners();
-
-    try {
-      _user = await authService.signUpWithEmail(email, password, displayName);
-      _error = null;
-    } catch (e) {
-      _error = e.toString();
-      if (kDebugMode) {
-        print('Erro no cadastro com email: $e');
-      }
-    } finally {
-      _isLoading = false;
-      notifyListeners();
-    }
-  }
-
-  Future<void> signInAnonymously() async {
-    _isLoading = true;
-    _error = null;
-    notifyListeners();
-
-    try {
-      _user = await authService.signInAnonymously();
-      _error = null;
-    } catch (e) {
-      _error = e.toString();
-      if (kDebugMode) {
-        print('Erro no login anônimo: $e');
-      }
-    } finally {
-      _isLoading = false;
-      notifyListeners();
-    }
-  }
-
-  Future<void> signOut() async {
+  Future<void> signUp(String email, String password, String name) async {
     _isLoading = true;
     notifyListeners();
 
     try {
-      await authService.signOut();
-      _user = null;
-      _error = null;
-    } catch (e) {
-      _error = e.toString();
-      if (kDebugMode) {
-        print('Erro ao fazer logout: $e');
-      }
-    } finally {
+      // Simular cadastro
+      await Future.delayed(const Duration(seconds: 2));
+
+      _user = User(
+        id: '1',
+        email: email,
+        name: name,
+        createdAt: DateTime.now(),
+        lastLogin: DateTime.now(),
+      );
+
       _isLoading = false;
       notifyListeners();
+    } catch (error) {
+      _isLoading = false;
+      notifyListeners();
+      rethrow;
     }
   }
 
-  void clearError() {
-    _error = null;
+  Future<void> loginWithGoogle() async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      // Simular login com Google
+      await Future.delayed(const Duration(seconds: 2));
+
+      _user = User(
+        id: '1',
+        email: 'usuario@gmail.com',
+        name: 'Usuário Google',
+        createdAt: DateTime.now(),
+        lastLogin: DateTime.now(),
+      );
+
+      _isLoading = false;
+      notifyListeners();
+    } catch (error) {
+      _isLoading = false;
+      notifyListeners();
+      rethrow;
+    }
+  }
+
+  Future<void> resetPassword(String email) async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      // Simular reset de senha
+      await Future.delayed(const Duration(seconds: 2));
+
+      _isLoading = false;
+      notifyListeners();
+    } catch (error) {
+      _isLoading = false;
+      notifyListeners();
+      rethrow;
+    }
+  }
+
+  Future<void> logout() async {
+    _user = null;
+    _rememberMe = false;
     notifyListeners();
   }
 }

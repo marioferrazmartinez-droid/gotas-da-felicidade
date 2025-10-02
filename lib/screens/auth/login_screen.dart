@@ -1,310 +1,129 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
-import '../../l10n/app_localizations.dart';
-import '../../widgets/auth_text_field.dart';
-import '../../widgets/social_login_button.dart';
-import '../../utils/validators.dart';
-import 'signup_screen.dart';
-import 'forgot_password_screen.dart';
-import 'auth_wrapper.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+class ForgotPasswordScreen extends StatefulWidget {
+  const ForgotPasswordScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<ForgotPasswordScreen> createState() => _ForgotPasswordScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-  bool _obscurePassword = true;
 
-  @override
-  void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
-    super.dispose();
-  }
+  Future<void> _resetPassword() async {
+    if (_formKey.currentState!.validate()) {
+      try {
+        await Provider.of<AuthProvider>(context, listen: false)
+            .resetPassword(_emailController.text);
 
-  Future<void> _login() async {
-    if (!_formKey.currentState!.validate()) return;
-
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    final success = await authProvider.login(
-      _emailController.text,
-      _passwordController.text,
-    );
-
-    if (success && mounted) {
-      _showSuccessSnackBar(AppLocalizations.of(context).loginSuccess);
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const AuthWrapper()),
-      );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Email de recuperação enviado!'),
+              backgroundColor: Colors.green,
+            ),
+          );
+          Navigator.pop(context);
+        }
+      } catch (error) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Erro: $error'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
     }
-  }
-
-  Future<void> _loginWithGoogle() async {
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    final success = await authProvider.loginWithGoogle();
-
-    if (success && mounted) {
-      _showSuccessSnackBar(AppLocalizations.of(context).loginSuccess);
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const AuthWrapper()),
-      );
-    }
-  }
-
-  void _navigateToSignUp() {
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => const SignUpScreen()),
-    );
-  }
-
-  void _navigateToForgotPassword() {
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => const ForgotPasswordScreen()),
-    );
-  }
-
-  void _showSuccessSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.green,
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
-  }
-
-  void _showErrorSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red,
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final authProvider = Provider.of<AuthProvider>(context);
-
-    // Mostrar erros do provider
-    if (authProvider.error != null && mounted) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _showErrorSnackBar(authProvider.error!);
-        authProvider.clearError(); // Limpar erro após mostrar
-      });
-    }
+    // final localizations = AppLocalizations.of(context);
 
     return Scaffold(
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
+      appBar: AppBar(
+        title: const Text('Recuperar Senha'),
+        backgroundColor: Colors.deepPurple,
+        foregroundColor: Colors.white,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Form(
+          key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Header
-              const SizedBox(height: 40),
-              Icon(
-                Icons.emoji_objects,
-                size: 80,
-                color: Colors.blue.shade700,
-              ),
               const SizedBox(height: 20),
               Text(
-                AppLocalizations.of(context).welcomeBack,
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.blue.shade700,
-                ),
+                'Digite seu email para recuperar a senha',
+                style: Theme.of(context).textTheme.titleMedium,
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 8),
-              Text(
-                AppLocalizations.of(context).loginToContinue,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.grey.shade600,
+              const SizedBox(height: 30),
+              TextFormField(
+                controller: _emailController,
+                decoration: const InputDecoration(
+                  labelText: 'Email',
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.email),
                 ),
-                textAlign: TextAlign.center,
+                keyboardType: TextInputType.emailAddress,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Por favor, digite seu email';
+                  }
+                  if (!value.contains('@')) {
+                    return 'Por favor, digite um email válido';
+                  }
+                  return null;
+                },
               ),
-              const SizedBox(height: 40),
-
-              // Formulário de Login
-              Form(
-                key: _formKey,
-                child: Column(
-                  children: [
-                    // Email
-                    AuthTextField(
-                      controller: _emailController,
-                      labelText: AppLocalizations.of(context).email,
-                      prefixIcon: Icons.email,
-                      keyboardType: TextInputType.emailAddress,
-                      textInputAction: TextInputAction.next,
-                      validator: Validators.validateEmail,
+              const SizedBox(height: 20),
+              Consumer<AuthProvider>(
+                builder: (context, authProvider, child) {
+                  return ElevatedButton(
+                    onPressed: authProvider.isLoading ? null : _resetPassword,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.deepPurple,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
                     ),
-                    const SizedBox(height: 16),
-
-                    // Senha
-                    TextFormField(
-                      controller: _passwordController,
-                      obscureText: _obscurePassword,
-                      textInputAction: TextInputAction.done,
-                      validator: Validators.validatePassword,
-                      onFieldSubmitted: (_) => _login(),
-                      decoration: InputDecoration(
-                        labelText: AppLocalizations.of(context).password,
-                        prefixIcon: const Icon(Icons.lock),
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            _obscurePassword
-                                ? Icons.visibility
-                                : Icons.visibility_off,
-                          ),
-                          onPressed: () {
-                            setState(() {
-                              _obscurePassword = !_obscurePassword;
-                            });
-                          },
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(
-                            color: Colors.blue.shade700,
-                            width: 2,
-                          ),
-                        ),
+                    child: authProvider.isLoading
+                        ? const SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                       ),
+                    )
+                        : const Text(
+                      'Enviar Email de Recuperação',
+                      style: TextStyle(fontSize: 16),
                     ),
-                    const SizedBox(height: 16),
-
-                    // Lembrar de mim e Esqueci a senha
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(
-                          children: [
-                            Checkbox(
-                              value: authProvider.rememberMe,
-                              onChanged: (value) {
-                                authProvider.setRememberMe(value ?? false);
-                              },
-                            ),
-                            Text(AppLocalizations.of(context).rememberMe),
-                          ],
-                        ),
-                        TextButton(
-                          onPressed: _navigateToForgotPassword,
-                          child: Text(
-                            AppLocalizations.of(context).forgotPassword,
-                            style: TextStyle(color: Colors.blue.shade700),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 24),
-
-                    // Botão de Login
-                    ElevatedButton(
-                      onPressed: authProvider.isLoading ? null : _login,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue.shade700,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        elevation: 2,
-                      ),
-                      child: authProvider.isLoading
-                          ? const SizedBox(
-                        height: 24,
-                        width: 24,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                              Colors.white),
-                        ),
-                      )
-                          : Text(
-                        AppLocalizations.of(context).login,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                  );
+                },
               ),
-
-              // Divisor
-              const SizedBox(height: 32),
-              Row(
-                children: [
-                  Expanded(
-                    child: Divider(color: Colors.grey.shade300),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Text(
-                      AppLocalizations.of(context).or,
-                      style: TextStyle(
-                        color: Colors.grey.shade600,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: Divider(color: Colors.grey.shade300),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-
-              // Login Social
-              SocialLoginButton(
-                type: 'google',
-                onPressed: _loginWithGoogle,
-                isLoading: authProvider.isLoading,
-              ),
-              const SizedBox(height: 12),
-
-              // Link para Cadastro
-              const SizedBox(height: 32),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    AppLocalizations.of(context).dontHaveAccount,
-                    style: TextStyle(color: Colors.grey.shade600),
-                  ),
-                  const SizedBox(width: 8),
-                  GestureDetector(
-                    onTap: _navigateToSignUp,
-                    child: Text(
-                      AppLocalizations.of(context).signUp,
-                      style: TextStyle(
-                        color: Colors.blue.shade700,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ],
+              const SizedBox(height: 10),
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Voltar ao Login'),
               ),
             ],
           ),
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    super.dispose();
   }
 }

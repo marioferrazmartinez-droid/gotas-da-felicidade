@@ -1,90 +1,70 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:timezone/timezone.dart' as tz;
 
 class NotificationHelper {
-  static final FlutterLocalNotificationsPlugin _notifications =
+  static final NotificationHelper _instance = NotificationHelper._internal();
+  factory NotificationHelper() => _instance;
+  NotificationHelper._internal();
+
+  static final FlutterLocalNotificationsPlugin _notificationsPlugin =
   FlutterLocalNotificationsPlugin();
 
-  static Future<void> initialize() async {
-    const AndroidInitializationSettings initializationSettingsAndroid =
+  Future<void> init() async {
+    const AndroidInitializationSettings androidSettings =
     AndroidInitializationSettings('@mipmap/ic_launcher');
 
-    const DarwinInitializationSettings initializationSettingsDarwin =
-    DarwinInitializationSettings(
-      requestAlertPermission: false,
-      requestBadgePermission: false,
-      requestSoundPermission: false,
+    const DarwinInitializationSettings iosSettings =
+    DarwinInitializationSettings();
+
+    const InitializationSettings settings = InitializationSettings(
+      android: androidSettings,
+      iOS: iosSettings,
     );
 
-    const InitializationSettings initializationSettings =
-    InitializationSettings(
-      android: initializationSettingsAndroid,
-      iOS: initializationSettingsDarwin,
-    );
-
-    await _notifications.initialize(initializationSettings);
+    await _notificationsPlugin.initialize(settings);
   }
 
-  static Future<void> showDailyNotification(String message) async {
-    const AndroidNotificationDetails androidPlatformChannelSpecifics =
-    AndroidNotificationDetails(
-      'happiness_channel',
-      'Gotas da Felicidade',
-      channelDescription: 'Notificações diárias motivacionais',
-      importance: Importance.defaultImportance,
-      priority: Priority.defaultPriority,
-      showWhen: true,
-    );
-
-    const DarwinNotificationDetails darwinPlatformChannelSpecifics =
-    DarwinNotificationDetails();
-
-    const NotificationDetails platformChannelSpecifics = NotificationDetails(
-      android: androidPlatformChannelSpecifics,
-      iOS: darwinPlatformChannelSpecifics,
-    );
-
-    await _notifications.show(
+  Future<void> scheduleDailyNotification({
+    required int hour,
+    required int minute,
+    required String title,
+    required String body,
+  }) async {
+    await _notificationsPlugin.zonedSchedule(
       0,
-      'Sua Gotinha de Felicidade 💫',
-      message,
-      platformChannelSpecifics,
+      title,
+      body,
+      _nextInstanceOfTime(hour, minute),
+      const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'daily_motivation',
+          'Motivação Diária',
+          channelDescription: 'Notificações com mensagens motivacionais diárias',
+          importance: Importance.high,
+          priority: Priority.high,
+        ),
+      ),
+      uiLocalNotificationDateInterpretation:
+      UILocalNotificationDateInterpretation.absoluteTime,
+      matchDateTimeComponents: DateTimeComponents.time,
     );
   }
 
-  static Future<void> scheduleDailyNotification(DateTime scheduledTime, String message) async {
-    const AndroidNotificationDetails androidPlatformChannelSpecifics =
-    AndroidNotificationDetails(
-      'happiness_channel',
-      'Gotas da Felicidade',
-      channelDescription: 'Notificações diárias motivacionais',
-      importance: Importance.defaultImportance,
-      priority: Priority.defaultPriority,
+  tz.TZDateTime _nextInstanceOfTime(int hour, int minute) {
+    final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
+    tz.TZDateTime scheduledDate = tz.TZDateTime(
+      tz.local,
+      now.year,
+      now.month,
+      now.day,
+      hour,
+      minute,
     );
 
-    const DarwinNotificationDetails darwinPlatformChannelSpecifics =
-    DarwinNotificationDetails();
+    if (scheduledDate.isBefore(now)) {
+      scheduledDate = scheduledDate.add(const Duration(days: 1));
+    }
 
-    const NotificationDetails platformChannelSpecifics = NotificationDetails(
-      android: androidPlatformChannelSpecifics,
-      iOS: darwinPlatformChannelSpecifics,
-    );
-
-    await _notifications.zonedSchedule(
-      0,
-      'Sua Gotinha de Felicidade 💫',
-      message,
-      scheduledTime,
-      platformChannelSpecifics,
-      uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-    );
-  }
-
-  static Future<void> cancelAllNotifications() async {
-    await _notifications.cancelAll();
-  }
-
-  static Future<void> cancelNotification(int id) async {
-    await _notifications.cancel(id);
+    return scheduledDate;
   }
 }
