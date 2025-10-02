@@ -1,99 +1,126 @@
-import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
+import 'package:flutter/foundation.dart';
 import '../models/user_model.dart';
 import '../services/auth_service.dart';
 
 class AuthProvider with ChangeNotifier {
-  final AuthService _authService = AuthService();
-  UserModel? _currentUser;
+  final AuthService authService;
+  UserModel? _user;
   bool _isLoading = false;
-  String? _errorMessage;
+  String? _error;
 
-  UserModel? get currentUser => _currentUser;
+  AuthProvider({required this.authService});
+
+  UserModel? get user => _user;
   bool get isLoading => _isLoading;
-  String? get errorMessage => _errorMessage;
+  String? get error => _error;
 
   Future<void> initialize() async {
     _isLoading = true;
     notifyListeners();
 
     try {
-      _currentUser = await _authService.getCurrentUser();
-      _errorMessage = null;
+      _user = await authService.getCurrentUser();
+      _error = null;
     } catch (e) {
-      _errorMessage = 'Erro ao carregar usuário: $e';
+      _error = e.toString();
+      if (kDebugMode) {
+        print('Erro ao inicializar auth: $e');
+      }
     } finally {
       _isLoading = false;
       notifyListeners();
     }
   }
 
-  Future<bool> signInWithGoogle() async {
+  Future<void> signInWithGoogle() async {
     _isLoading = true;
-    _errorMessage = null;
+    _error = null;
     notifyListeners();
 
     try {
-      _currentUser = await _authService.signInWithGoogle();
-      _errorMessage = null;
-      return true;
+      _user = await authService.signInWithGoogle();
+      _error = null;
     } catch (e) {
-      _errorMessage = 'Erro no login com Google: $e';
-      return false;
+      _error = e.toString();
+      if (kDebugMode) {
+        print('Erro no login com Google: $e');
+      }
     } finally {
       _isLoading = false;
       notifyListeners();
     }
   }
 
-  Future<bool> signInWithFacebook() async {
+  Future<void> signInWithFacebook() async {
     _isLoading = true;
-    _errorMessage = null;
+    _error = null;
     notifyListeners();
 
     try {
-      _currentUser = await _authService.signInWithFacebook();
-      _errorMessage = null;
-      return true;
+      _user = await authService.signInWithFacebook();
+      _error = null;
     } catch (e) {
-      _errorMessage = 'Erro no login com Facebook: $e';
-      return false;
+      _error = e.toString();
+      if (kDebugMode) {
+        print('Erro no login com Facebook: $e');
+      }
     } finally {
       _isLoading = false;
       notifyListeners();
     }
   }
 
-  Future<bool> signInWithEmail(String email, String password) async {
+  Future<void> signInWithEmail(String email, String password) async {
     _isLoading = true;
-    _errorMessage = null;
+    _error = null;
     notifyListeners();
 
     try {
-      _currentUser = await _authService.signInWithEmail(email, password);
-      _errorMessage = null;
-      return true;
+      _user = await authService.signInWithEmail(email, password);
+      _error = null;
     } catch (e) {
-      _errorMessage = 'Erro no login com email: $e';
-      return false;
+      _error = e.toString();
+      if (kDebugMode) {
+        print('Erro no login com email: $e');
+      }
     } finally {
       _isLoading = false;
       notifyListeners();
     }
   }
 
-  Future<bool> signInAnonymously() async {
+  Future<void> signUpWithEmail(String email, String password, String displayName) async {
     _isLoading = true;
-    _errorMessage = null;
+    _error = null;
     notifyListeners();
 
     try {
-      _currentUser = await _authService.signInAnonymously();
-      _errorMessage = null;
-      return true;
+      _user = await authService.signUpWithEmail(email, password, displayName);
+      _error = null;
     } catch (e) {
-      _errorMessage = 'Erro no login anônimo: $e';
-      return false;
+      _error = e.toString();
+      if (kDebugMode) {
+        print('Erro no cadastro com email: $e');
+      }
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> signInAnonymously() async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      _user = await authService.signInAnonymously();
+      _error = null;
+    } catch (e) {
+      _error = e.toString();
+      if (kDebugMode) {
+        print('Erro no login anônimo: $e');
+      }
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -105,70 +132,14 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      await _authService.signOut();
-      _currentUser = null;
-      _errorMessage = null;
+      await authService.signOut();
+      _user = null;
+      _error = null;
     } catch (e) {
-      _errorMessage = 'Erro ao fazer logout: $e';
-    } finally {
-      _isLoading = false;
-      notifyListeners();
-    }
-  }
-
-  Future<bool> updateProfile(String displayName, String? photoURL) async {
-    _isLoading = true;
-    notifyListeners();
-
-    try {
-      await _authService.updateUserProfile(displayName, photoURL);
-
-      // Atualizar usuário local
-      if (_currentUser != null) {
-        _currentUser = UserModel(
-          uid: _currentUser!.uid,
-          email: _currentUser!.email,
-          displayName: displayName,
-          photoURL: photoURL,
-          provider: _currentUser!.provider,
-          createdAt: _currentUser!.createdAt,
-          lastLogin: _currentUser!.lastLogin,
-          isPremium: _currentUser!.isPremium,
-          dailyMessageCount: _currentUser!.dailyMessageCount,
-          favoriteMessages: _currentUser!.favoriteMessages,
-        );
+      _error = e.toString();
+      if (kDebugMode) {
+        print('Erro ao fazer logout: $e');
       }
-
-      _errorMessage = null;
-      return true;
-    } catch (e) {
-      _errorMessage = 'Erro ao atualizar perfil: $e';
-      return false;
-    } finally {
-      _isLoading = false;
-      notifyListeners();
-    }
-  }
-
-  // Método para atualizar email (usando a nova API)
-  Future<bool> updateEmail(String newEmail) async {
-    if (_currentUser == null) return false;
-
-    _isLoading = true;
-    notifyListeners();
-
-    try {
-      // Usando a nova API recomendada
-      final user = firebase_auth.FirebaseAuth.instance.currentUser;
-      if (user != null) {
-        await user.verifyBeforeUpdateEmail(newEmail);
-        _errorMessage = 'Email de verificação enviado para $newEmail';
-        return true;
-      }
-      return false;
-    } catch (e) {
-      _errorMessage = 'Erro ao atualizar email: $e';
-      return false;
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -176,9 +147,7 @@ class AuthProvider with ChangeNotifier {
   }
 
   void clearError() {
-    _errorMessage = null;
+    _error = null;
     notifyListeners();
   }
-
-  bool get isLoggedIn => _currentUser != null;
 }
