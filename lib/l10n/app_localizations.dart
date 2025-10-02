@@ -1,5 +1,3 @@
-// lib/l10n/app_localizations.dart
-
 import 'package:flutter/material.dart';
 
 class AppLocalizations {
@@ -13,35 +11,53 @@ class AppLocalizations {
 
   static const LocalizationsDelegate<AppLocalizations> delegate = _AppLocalizationsDelegate();
 
-  // Métodos com fallback para inglês
-  String get appTitle => _getLocalizedValue('appTitle');
-  String get welcome => _getLocalizedValue('welcome');
-  String get dailyMotivation => _getLocalizedValue('dailyMotivation');
-  String get getMotivation => _getLocalizedValue('getMotivation');
-  String get newMotivation => _getLocalizedValue('newMotivation');
-  String get settings => _getLocalizedValue('settings');
-  String get language => _getLocalizedValue('language');
-  String get login => _getLocalizedValue('login');
-  String get signup => _getLocalizedValue('signup');
-  String get logout => _getLocalizedValue('logout');
-  String get email => _getLocalizedValue('email');
-  String get password => _getLocalizedValue('password');
-  String get name => _getLocalizedValue('name');
-  String get confirmPassword => _getLocalizedValue('confirmPassword');
+  // ========== TODOS OS MÉTODOS EM ORDEM ALFABÉTICA ==========
+
   String get alreadyHaveAccount => _getLocalizedValue('alreadyHaveAccount');
+  String get appTitle => _getLocalizedValue('appTitle');
+  String get cancel => _getLocalizedValue('cancel');
+  String get confirmPassword => _getLocalizedValue('confirmPassword');
+  String get continueWithApple => _getLocalizedValue('continueWithApple');
+  String get continueWithFacebook => _getLocalizedValue('continueWithFacebook');
+  String get continueWithGoogle => _getLocalizedValue('continueWithGoogle');
+  String get createAccount => _getLocalizedValue('createAccount');
+  String get createAccountDescription => _getLocalizedValue('createAccountDescription');
+  String get dailyMotivation => _getLocalizedValue('dailyMotivation');
   String get dontHaveAccount => _getLocalizedValue('dontHaveAccount');
-  String get or => _getLocalizedValue('or');
-  String get loading => _getLocalizedValue('loading');
+  String get email => _getLocalizedValue('email');
   String get error => _getLocalizedValue('error');
-  String get success => _getLocalizedValue('success');
-  String get motivationLoading => _getLocalizedValue('motivationLoading');
-  String get todayMessage => _getLocalizedValue('todayMessage');
-  String get notificationTitle => _getLocalizedValue('notificationTitle');
-  String get notificationBody => _getLocalizedValue('notificationBody');
-  String get goodMorning => _getLocalizedValue('goodMorning');
+  String get forgotPassword => _getLocalizedValue('forgotPassword');
+  String get getMotivation => _getLocalizedValue('getMotivation');
   String get goodAfternoon => _getLocalizedValue('goodAfternoon');
   String get goodEvening => _getLocalizedValue('goodEvening');
+  String get goodMorning => _getLocalizedValue('goodMorning');
   String get happinessQuote => _getLocalizedValue('happinessQuote');
+  String get joinUs => _getLocalizedValue('joinUs');
+  String get language => _getLocalizedValue('language');
+  String get loading => _getLocalizedValue('loading');
+  String get login => _getLocalizedValue('login');
+  String get loginSuccess => _getLocalizedValue('loginSuccess');
+  String get loginToContinue => _getLocalizedValue('loginToContinue');
+  String get logout => _getLocalizedValue('logout');
+  String get logoutConfirmation => _getLocalizedValue('logoutConfirmation');
+  String get logoutSuccess => _getLocalizedValue('logoutSuccess');
+  String get motivationLoading => _getLocalizedValue('motivationLoading');
+  String get name => _getLocalizedValue('name');
+  String get newMotivation => _getLocalizedValue('newMotivation');
+  String get notificationBody => _getLocalizedValue('notificationBody');
+  String get notificationTitle => _getLocalizedValue('notificationTitle');
+  String get or => _getLocalizedValue('or');
+  String get password => _getLocalizedValue('password');
+  String get rememberMe => _getLocalizedValue('rememberMe');
+  String get resetPassword => _getLocalizedValue('resetPassword');
+  String get resetPasswordSent => _getLocalizedValue('resetPasswordSent');
+  String get settings => _getLocalizedValue('settings');
+  String get signUp => _getLocalizedValue('signUp');
+  String get signupSuccess => _getLocalizedValue('signupSuccess');
+  String get success => _getLocalizedValue('success');
+  String get todayMessage => _getLocalizedValue('todayMessage');
+  String get welcome => _getLocalizedValue('welcome');
+  String get welcomeBack => _getLocalizedValue('welcomeBack');
 
   /// Obtém valor localizado com fallback para inglês
   String _getLocalizedValue(String key) {
@@ -79,7 +95,7 @@ class AppLocalizations {
       'settings': 'Settings',
       'language': 'Language',
       'login': 'Login',
-      'signup': 'Sign Up',
+      'signUp': 'Sign Up',
       'logout': 'Logout',
       'email': 'Email',
       'password': 'Password',
@@ -99,6 +115,23 @@ class AppLocalizations {
       'goodAfternoon': 'Good Afternoon',
       'goodEvening': 'Good Evening',
       'happinessQuote': 'Happiness is not something ready-made. It comes from your own actions.',
+      'welcomeBack': 'Welcome back!',
+      'loginToContinue': 'Login to continue',
+      'rememberMe': 'Remember me',
+      'forgotPassword': 'Forgot password?',
+      'resetPassword': 'Reset Password',
+      'resetPasswordSent': 'Recovery email sent!',
+      'cancel': 'Cancel',
+      'loginSuccess': 'Login successful!',
+      'signupSuccess': 'Account created successfully!',
+      'logoutConfirmation': 'Are you sure you want to logout',
+      'logoutSuccess': 'Logout successful',
+      'joinUs': 'Join us!',
+      'createAccountDescription': 'Create your account to start your happiness journey',
+      'createAccount': 'Create Account',
+      'continueWithGoogle': 'Continue with Google',
+      'continueWithApple': 'Continue with Apple',
+      'continueWithFacebook': 'Continue with Facebook',
     },
     'pt': {
       'appTitle': 'Gotas da Felicidade',
@@ -109,7 +142,7 @@ class AppLocalizations {
       'settings': 'Configurações',
       'language': 'Idioma',
       'login': 'Entrar',
-      'signup': 'Cadastrar',
+      'signUp': 'Cadastrar',
       'logout': 'Sair',
       'email': 'E-mail',
       'password': 'Senha',
@@ -129,6 +162,23 @@ class AppLocalizations {
       'goodAfternoon': 'Boa Tarde',
       'goodEvening': 'Boa Noite',
       'happinessQuote': 'A felicidade não é algo pronto. Ela vem das suas próprias ações.',
+      'welcomeBack': 'Bem-vindo de volta!',
+      'loginToContinue': 'Faça login para continuar',
+      'rememberMe': 'Lembrar de mim',
+      'forgotPassword': 'Esqueceu a senha?',
+      'resetPassword': 'Redefinir Senha',
+      'resetPasswordSent': 'Email de recuperação enviado!',
+      'cancel': 'Cancelar',
+      'loginSuccess': 'Login realizado com sucesso!',
+      'signupSuccess': 'Conta criada com sucesso!',
+      'logoutConfirmation': 'Tem certeza que deseja sair',
+      'logoutSuccess': 'Logout realizado com sucesso',
+      'joinUs': 'Junte-se a nós!',
+      'createAccountDescription': 'Crie sua conta para começar sua jornada de felicidade',
+      'createAccount': 'Criar Conta',
+      'continueWithGoogle': 'Continuar com Google',
+      'continueWithApple': 'Continuar com Apple',
+      'continueWithFacebook': 'Continuar com Facebook',
     },
     'es': {
       'appTitle': 'Gotas de Felicidad',
@@ -139,14 +189,14 @@ class AppLocalizations {
       'settings': 'Configuración',
       'language': 'Idioma',
       'login': 'Iniciar Sesión',
-      'signup': 'Registrarse',
+      'signUp': 'Registrarse',
       'logout': 'Cerrar Sesión',
       'email': 'Correo Electrónico',
       'password': 'Contraseña',
       'name': 'Nombre',
       'confirmPassword': 'Confirmar Contraseña',
       'alreadyHaveAccount': '¿Ya tienes una cuenta?',
-      'dontHaveAccount': '¿No tienes una conta?',
+      'dontHaveAccount': '¿No tienes una cuenta?',
       'or': 'O',
       'loading': 'Cargando...',
       'error': 'Error',
@@ -169,7 +219,7 @@ class AppLocalizations {
       'settings': 'Paramètres',
       'language': 'Langue',
       'login': 'Connexion',
-      'signup': 'S\'inscrire',
+      'signUp': 'S\'inscrire',
       'logout': 'Déconnexion',
       'email': 'E-mail',
       'password': 'Mot de passe',

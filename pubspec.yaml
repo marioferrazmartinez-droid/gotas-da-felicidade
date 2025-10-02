@@ -1,46 +1,45 @@
 name: gotas_da_felicidade
-description: "Aplicativo multilingue de motivação diária com IA - Drops of Happiness"
-publish_to: 'none'
+description: Aplicativo de mensagens motivacionais
 
+publish_to: 'none'
 version: 1.0.0+1
 
 environment:
-  sdk: '>=3.9.2 <4.0.0'
+  sdk: '>=3.0.0 <4.0.0'
 
 dependencies:
   flutter:
     sdk: flutter
 
-  # Firebase
-  firebase_core: ^2.32.0
-  firebase_auth: ^4.20.0
-  cloud_firestore: ^4.17.5
-  firebase_messaging: ^14.9.4
-
-  # IA
-  google_generative_ai: ^0.2.1
+  # Dependências básicas
   http: ^1.1.0
-
-  # Gerenciamento de Estado
-  provider: ^6.1.1
-
-  # Armazenamento Local
   shared_preferences: ^2.2.2
+  share_plus: ^7.2.2
+  url_launcher: ^6.1.11
+  flutter_dotenv: ^5.2.1
 
-  # Internacionalização
+  # Notificações
+  flutter_local_notifications: ^16.3.0
+
+  # Firebase (opcional - comentado por enquanto)
+  # firebase_core: ^2.32.0
+  # firebase_auth: ^4.20.0
+  # cloud_firestore: ^4.17.5
+  # google_sign_in: ^6.3.0
+  # flutter_facebook_auth: ^7.1.0
+  # sign_in_with_apple: ^5.0.0
+
+  # Localização
   flutter_localizations:
     sdk: flutter
   intl: ^0.20.2
-  flutter_local_notifications: ^19.4.2
-  timezone: ^0.10.1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^5.0.0
+  flutter_lints: ^3.0.2
 
 flutter:
   uses-material-design: true
-
   assets:
-    - assets/images/
+    - .env

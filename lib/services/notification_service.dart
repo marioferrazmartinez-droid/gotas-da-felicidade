@@ -1,6 +1,6 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
-class NotificationHelper {
+class NotificationService {
   static final FlutterLocalNotificationsPlugin _notifications =
   FlutterLocalNotificationsPlugin();
 
@@ -51,7 +51,13 @@ class NotificationHelper {
     );
   }
 
-  static Future<void> scheduleDailyNotification(DateTime scheduledTime, String message) async {
+  static Future<void> scheduleDailyNotification(String message) async {
+    final now = DateTime.now();
+    final scheduledTime = DateTime(now.year, now.month, now.day, 8, 0, 0);
+    if (scheduledTime.isBefore(now)) {
+      scheduledTime.add(const Duration(days: 1));
+    }
+
     const AndroidNotificationDetails androidPlatformChannelSpecifics =
     AndroidNotificationDetails(
       'happiness_channel',
@@ -86,5 +92,10 @@ class NotificationHelper {
 
   static Future<void> cancelNotification(int id) async {
     await _notifications.cancel(id);
+  }
+
+  static Future<bool> isNotificationScheduled(int id) async {
+    final pendingNotifications = await _notifications.pendingNotificationRequests();
+    return pendingNotifications.any((notification) => notification.id == id);
   }
 }

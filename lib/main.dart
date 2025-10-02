@@ -4,8 +4,8 @@ import 'package:provider/provider.dart';
 
 import 'config/environment.dart';
 import 'l10n/app_localizations.dart';
-import 'screens/home/home_screen.dart';
-import 'services/auth_service.dart';
+import 'providers/auth_provider.dart';
+import 'screens/auth/auth_wrapper.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -36,7 +36,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        Provider<AuthService>(create: (_) => AuthService()),
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
         // Outros providers podem ser adicionados aqui
       ],
       child: MaterialApp(
@@ -60,11 +60,20 @@ class MyApp extends StatelessWidget {
           visualDensity: VisualDensity.adaptivePlatformDensity,
           fontFamily: 'NotoSans',
           useMaterial3: true,
+          inputDecorationTheme: InputDecorationTheme(
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Colors.blue, width: 2),
+            ),
+          ),
         ),
         darkTheme: ThemeData.dark().copyWith(
           visualDensity: VisualDensity.adaptivePlatformDensity,
         ),
-        home: const HomeScreen(), // Temporariamente direto para Home
+        home: const AuthWrapper(), // ✅ AGORA USA O AUTH WRAPPER
         debugShowCheckedModeBanner: Environment.isDebug,
       ),
     );
