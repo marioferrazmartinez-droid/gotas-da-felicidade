@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
-
+import 'package:firebase_core/firebase_core.dart';
 import 'providers/auth_provider.dart';
 import 'providers/quote_provider.dart';
 import 'screens/auth/auth_wrapper.dart';
-import 'l10n/arb/app_localizations.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   runApp(const MyApp());
 }
 
@@ -27,17 +27,6 @@ class MyApp extends StatelessWidget {
           primarySwatch: Colors.deepPurple,
           useMaterial3: true,
         ),
-        supportedLocales: const [
-          Locale('en', ''),
-          Locale('pt', ''),
-        ],
-        localizationsDelegates: const [
-          AppLocalizations.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-        ],
-        locale: const Locale('pt', ''),
         home: const AuthWrapper(),
         debugShowCheckedModeBanner: false,
       ),

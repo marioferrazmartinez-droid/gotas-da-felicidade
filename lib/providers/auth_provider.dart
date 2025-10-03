@@ -1,15 +1,42 @@
 import 'package:flutter/foundation.dart';
-import '../models/user_model.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../models/user_model.dart' as app_model; // Alias para evitar conflito
 
 class AuthProvider with ChangeNotifier {
-  User? _user;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
+
+  app_model.UserModel? _user;
   bool _isLoading = false;
   bool _rememberMe = false;
 
-  User? get user => _user;
+  app_model.UserModel? get user => _user;
   bool get isLoading => _isLoading;
   bool get rememberMe => _rememberMe;
   bool get isLoggedIn => _user != null;
+
+  AuthProvider() {
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedEmail = prefs.getString('user_email');
+    final savedName = prefs.getString('user_name');
+
+    if (savedEmail != null && _rememberMe) {
+      _user = app_model.UserModel(
+        id: '1',
+        email: savedEmail,
+        name: savedName ?? 'Usuário',
+        createdAt: DateTime.now(),
+        lastLogin: DateTime.now(),
+      );
+      notifyListeners();
+    }
+  }
 
   void setRememberMe(bool value) {
     _rememberMe = value;
@@ -21,23 +48,26 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      // Simular login
-      await Future.delayed(const Duration(seconds: 2));
-
-      _user = User(
-        id: '1',
+      final UserCredential userCredential =
+      await _auth.signInWithEmailAndPassword(
         email: email,
-        name: 'Usuário',
-        createdAt: DateTime.now(),
-        lastLogin: DateTime.now(),
+        password: password,
       );
 
+      _user = _userFromFirebase(userCredential.user!);
+
+      if (_rememberMe) {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('user_email', email);
+        await prefs.setString('user_name', _user!.name!);
+      }
+
       _isLoading = false;
       notifyListeners();
-    } catch (error) {
+    } on FirebaseAuthException catch (e) {
       _isLoading = false;
       notifyListeners();
-      rethrow;
+      throw e.message ?? 'Erro no login';
     }
   }
 
@@ -46,23 +76,29 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      // Simular cadastro
-      await Future.delayed(const Duration(seconds: 2));
-
-      _user = User(
-        id: '1',
+      final UserCredential userCredential =
+      await _auth.createUserWithEmailAndPassword(
         email: email,
-        name: name,
-        createdAt: DateTime.now(),
-        lastLogin: DateTime.now(),
+        password: password,
       );
 
+      // Atualizar display name
+      await userCredential.user!.updateDisplayName(name);
+
+      _user = _userFromFirebase(userCredential.user!);
+
+      if (_rememberMe) {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('user_email', email);
+        await prefs.setString('user_name', name);
+      }
+
       _isLoading = false;
       notifyListeners();
-    } catch (error) {
+    } on FirebaseAuthException catch (e) {
       _isLoading = false;
       notifyListeners();
-      rethrow;
+      throw e.message ?? 'Erro no cadastro';
     }
   }
 
@@ -71,20 +107,31 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      // Simular login com Google
-      await Future.delayed(const Duration(seconds: 2));
+      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+      if (googleUser == null) throw Exception('Login cancelado');
 
-      _user = User(
-        id: '1',
-        email: 'usuario@gmail.com',
-        name: 'Usuário Google',
-        createdAt: DateTime.now(),
-        lastLogin: DateTime.now(),
+      final GoogleSignInAuthentication googleAuth =
+      await googleUser.authentication;
+
+      final AuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
       );
+
+      final UserCredential userCredential =
+      await _auth.signInWithCredential(credential);
+
+      _user = _userFromFirebase(userCredential.user!);
+
+      if (_rememberMe) {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('user_email', _user!.email!);
+        await prefs.setString('user_name', _user!.name!);
+      }
 
       _isLoading = false;
       notifyListeners();
-    } catch (error) {
+    } catch (e) {
       _isLoading = false;
       notifyListeners();
       rethrow;
@@ -96,21 +143,34 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      // Simular reset de senha
-      await Future.delayed(const Duration(seconds: 2));
-
+      await _auth.sendPasswordResetEmail(email: email);
       _isLoading = false;
       notifyListeners();
-    } catch (error) {
+    } on FirebaseAuthException catch (e) {
       _isLoading = false;
       notifyListeners();
-      rethrow;
+      throw e.message ?? 'Erro ao enviar email de recuperação';
     }
   }
 
   Future<void> logout() async {
+    await _auth.signOut();
+    await _googleSignIn.signOut();
     _user = null;
     _rememberMe = false;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('user_email');
+    await prefs.remove('user_name');
     notifyListeners();
+  }
+
+  app_model.UserModel _userFromFirebase(User firebaseUser) {
+    return app_model.UserModel(
+      id: firebaseUser.uid,
+      email: firebaseUser.email,
+      name: firebaseUser.displayName ?? firebaseUser.email!.split('@').first,
+      createdAt: firebaseUser.metadata.creationTime ?? DateTime.now(),
+      lastLogin: firebaseUser.metadata.lastSignInTime ?? DateTime.now(),
+    );
   }
 }

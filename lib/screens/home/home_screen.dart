@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../providers/quote_provider.dart';
 import '../../widgets/message_card.dart';
 import '../../widgets/settings_dialog.dart';
@@ -22,7 +23,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _initializeApp() async {
     // Inicialização geral do app
-    // Notificações podem ser adicionadas posteriormente
   }
 
   void _showNextQuote() {
@@ -39,10 +39,65 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  void _shareQuote(Quote quote) {
-    final shareText = '"${quote.text}" - ${quote.author}';
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Compartilhando: $shareText')),
+  void _shareQuote(Quote quote) async {
+    final shareText = '"${quote.text}" - ${quote.author}\n\nCompartilhado via Gotas da Felicidade';
+
+    // Para WhatsApp
+    final whatsappUrl = "whatsapp://send?text=${Uri.encodeComponent(shareText)}";
+
+    // Para outros apps
+    final smsUrl = "sms:?body=${Uri.encodeComponent(shareText)}";
+
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => SizedBox(
+        height: 200,
+        child: Column(
+          children: [
+            const Padding(
+              padding: EdgeInsets.all(16.0),
+              child: Text(
+                'Compartilhar via:',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.chat, color: Colors.green),
+              title: const Text('WhatsApp'),
+              onTap: () async {
+                Navigator.pop(context);
+                if (await canLaunchUrl(Uri.parse(whatsappUrl))) {
+                  await launchUrl(Uri.parse(whatsappUrl));
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('WhatsApp não instalado')),
+                  );
+                }
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.message),
+              title: const Text('Mensagem de Texto'),
+              onTap: () async {
+                Navigator.pop(context);
+                if (await canLaunchUrl(Uri.parse(smsUrl))) {
+                  await launchUrl(Uri.parse(smsUrl));
+                }
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.copy),
+              title: const Text('Copiar Texto'),
+              onTap: () {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Texto copiado!')),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
     );
   }
 

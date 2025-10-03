@@ -1,4 +1,4 @@
-class User {
+class UserModel {
   final String id;
   final String? email;
   final String? name;
@@ -6,7 +6,7 @@ class User {
   final DateTime? lastLogin;
   final Map<String, dynamic> preferences;
 
-  User({
+  UserModel({
     required this.id,
     this.email,
     this.name,
@@ -15,8 +15,8 @@ class User {
     this.preferences = const {},
   });
 
-  factory User.fromMap(Map<String, dynamic> map) {
-    return User(
+  factory UserModel.fromMap(Map<String, dynamic> map) {
+    return UserModel(
       id: map['id'] ?? '',
       email: map['email'],
       name: map['name'],
@@ -41,7 +41,7 @@ class User {
     };
   }
 
-  User copyWith({
+  UserModel copyWith({
     String? id,
     String? email,
     String? name,
@@ -49,7 +49,7 @@ class User {
     DateTime? lastLogin,
     Map<String, dynamic>? preferences,
   }) {
-    return User(
+    return UserModel(
       id: id ?? this.id,
       email: email ?? this.email,
       name: name ?? this.name,
